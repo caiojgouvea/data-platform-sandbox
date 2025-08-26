@@ -31,6 +31,8 @@ services:
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
+    mem_limit: 512m
+    cpus: "0.5"
 
   airflow-webserver:
     image: *airflow_image
@@ -54,6 +56,8 @@ services:
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
+    mem_limit: 2g
+    cpus: "1.0"
 
   airflow-scheduler:
     image: *airflow_image
@@ -75,6 +79,8 @@ services:
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
+    mem_limit: 2g
+    cpus: "1.0"
 
   airflow-worker:
     image: *airflow_image
@@ -96,6 +102,8 @@ services:
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
+    mem_limit: 4g
+    cpus: "2.0"
 
 networks:
   datalab-net:

@@ -40,3 +40,6 @@ venv/
 # ---- OS ----
 .DS_Store
 Thumbs.db
+
+spark/conf/*.*.template
+spark/conf/*.template
