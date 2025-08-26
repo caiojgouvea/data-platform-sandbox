@@ -11,6 +11,7 @@ services:
       AIRFLOW_UID: ${AIRFLOW_UID}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      PYTHONPATH: /opt/airflow/src
     user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
     entrypoint: /bin/bash
     command:
@@ -39,6 +40,7 @@ services:
       AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      PYTHONPATH: /opt/airflow/src
     depends_on:
       - postgres
       - redis
@@ -60,6 +62,7 @@ services:
       AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      PYTHONPATH: /opt/airflow/src
     depends_on:
       - airflow-webserver
     user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
@@ -79,6 +82,7 @@ services:
       AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      PYTHONPATH: /opt/airflow/src
     depends_on:
       - airflow-webserver
     user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
