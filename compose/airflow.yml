@@ -29,6 +29,7 @@ services:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
+      - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
 
   airflow-webserver:
@@ -51,6 +52,7 @@ services:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
+      - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
 
   airflow-scheduler:
@@ -71,6 +73,7 @@ services:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
+      - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
 
   airflow-worker:
@@ -91,6 +94,7 @@ services:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
+      - ../src:/opt/airflow/src:rw
     networks: ["datalab-net"]
 
 networks:

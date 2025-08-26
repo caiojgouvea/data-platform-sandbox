@@ -7,7 +7,6 @@ postgres/data/
 
 # ---- Airflow runtime ----
 airflow/logs/
-airflow/plugins/   # se quiser manter plugins customizados versionados, remova esta linha
 airflow/__pycache__/
 airflow/*.pid
 

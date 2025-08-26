@@ -16,14 +16,13 @@ help: ## Mostra esta ajuda
 	@echo "  make down-core       - derruba MinIO + Postgres (mantém dados)"
 	@echo "  make ps-core         - status dos containers core"
 	@echo "  make up-airflow      - sobe Redis + Airflow (depende do core)"
-	@echo "  make init-airflow    - inicializa DB do Airflow e cria usuário admin"
 	@echo "  make ps-airflow      - status dos serviços do Airflow"
 	@echo "  make logs-airflow    - segue logs do webserver e scheduler"
 	@echo "  make down-airflow    - derruba serviços do Airflow (mantém dados)"
 	@echo "  make down-all        - derruba tudo (mantém dados)"
 	@echo "  make stop-all        - para tudo (mantém dados)"
 	@echo "  make restart-airflow - reinicia webserver/scheduler/worker"
-	@echo "  make all             - sobe tudo (core + airflow, com init)"
+	@echo "  make all             - sobe tudo (core + airflow, sem init)"
 	@echo "  make start           - sobe tudo (core + airflow, sem init)"
 	@echo "  make env             - gera .env se não existir"
 
@@ -44,21 +43,6 @@ ps-core: ## Mostra status do core
 
 up-airflow: network env ## Sobe Redis + Airflow (exige core ativo)
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) up -d
-
-init-airflow: ## Inicializa DB e cria usuário admin (rodar 1x ou após reset)
-	@docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) run --rm airflow-init bash -c "\
-	if airflow users list | grep -q '${_AIRFLOW_WWW_USER_USERNAME}'; then \
-		echo 'Usuário ${_AIRFLOW_WWW_USER_USERNAME} já existe. Pulando criação de usuário.'; \
-	else \
-		airflow db upgrade && \
-		airflow users create \
-			--username '${_AIRFLOW_WWW_USER_USERNAME}' \
-			--password '${_AIRFLOW_WWW_USER_PASSWORD}' \
-			--firstname Admin \
-			--lastname User \
-			--role Admin \
-			--email admin@example.com; \
-	fi"
 
 ps-airflow: ## Status do Airflow
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) ps
@@ -82,6 +66,6 @@ restart-airflow: ## Reinicia webserver/scheduler/worker
 
 # ====== Meta targets ======
 
-all: up-core init-airflow up-airflow ## Sobe todo o stack (com init)
+all: up-core up-airflow ## Sobe todo o stack (sem init)
 
 start: up-core up-airflow ## Sobe todo o stack (sem init, uso diário)
