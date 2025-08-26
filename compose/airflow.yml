@@ -1,0 +1,94 @@
+x-airflow-image: &airflow_image apache/airflow:2.9.2-python3.11
+
+services:
+  airflow-init:
+    image: *airflow_image
+    env_file: ../.env
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      AIRFLOW_UID: ${AIRFLOW_UID}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+    user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - >
+        set -e;
+        for i in $(seq 1 30); do
+          if pg_isready -h postgres -p 5432 -U "${POSTGRES_USER}" >/dev/null 2>&1; then
+            break;
+          fi;
+          sleep 1;
+        done;
+        airflow db migrate;
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - ../airflow/logs:/opt/airflow/logs
+      - ../airflow/plugins:/opt/airflow/plugins
+    networks: ["datalab-net"]
+
+  airflow-webserver:
+    image: *airflow_image
+    env_file: ../.env
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+    depends_on:
+      - postgres
+      - redis
+    ports: ["8088:8080"]
+    user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
+    command: webserver
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - ../airflow/logs:/opt/airflow/logs
+      - ../airflow/plugins:/opt/airflow/plugins
+    networks: ["datalab-net"]
+
+  airflow-scheduler:
+    image: *airflow_image
+    env_file: ../.env
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+    depends_on:
+      - airflow-webserver
+    user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
+    command: scheduler
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - ../airflow/logs:/opt/airflow/logs
+      - ../airflow/plugins:/opt/airflow/plugins
+    networks: ["datalab-net"]
+
+  airflow-worker:
+    image: *airflow_image
+    env_file: ../.env
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+    depends_on:
+      - airflow-webserver
+    user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
+    command: celery worker
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - ../airflow/logs:/opt/airflow/logs
+      - ../airflow/plugins:/opt/airflow/plugins
+    networks: ["datalab-net"]
+
+networks:
+  datalab-net:
+    external: true

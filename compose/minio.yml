@@ -1,0 +1,15 @@
+services:
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    env_file: ../.env
+    ports: ["9000:9000", "9001:9001"]
+    volumes:
+      - ../minio/data:/data
+    networks: ["datalab-net"]
+    mem_limit: 512m
+    cpus: "1.0"
+
+networks:
+  datalab-net:
+    external: true

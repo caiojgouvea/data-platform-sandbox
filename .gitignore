@@ -1,0 +1,43 @@
+# ---- Segredos ----
+.env
+
+# ---- Dados persistentes (bind mounts) ----
+minio/data/
+postgres/data/
+
+# ---- Airflow runtime ----
+airflow/logs/
+airflow/plugins/   # se quiser manter plugins customizados versionados, remova esta linha
+airflow/__pycache__/
+airflow/*.pid
+
+# ---- Python ----
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ---- Virtualenv (caso use) ----
+.venv/
+env/
+venv/
+
+# ---- Arquivos temporários ----
+*.swp
+*.swo
+*.tmp
+*.log
+
+# ---- IDEs / Editor configs ----
+.vscode/
+.idea/
+*.iml
+
+# ---- Docker ----
+*.pid
+*.sock
+.docker/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db

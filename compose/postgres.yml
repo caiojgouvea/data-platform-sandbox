@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:15
+    env_file: ../.env
+    environment:
+      - TZ=${TZ}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports: ["5432:5432"]
+    volumes:
+      - ../postgres/data:/var/lib/postgresql/data
+    networks: ["datalab-net"]
+    shm_size: "256m"
+    mem_limit: 1g
+    cpus: "1.5"
+
+networks:
+  datalab-net:
+    external: true
