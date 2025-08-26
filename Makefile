@@ -2,6 +2,7 @@
 PROJECT := datalab
 FILES_CORE := -f compose/minio.yml -f compose/postgres.yml
 FILES_AIRFLOW := $(FILES_CORE) -f compose/redis.yml -f compose/airflow.yml
+FILES_SPARK := -f compose/spark.yml
 NETWORK := datalab-net
 ENVFILE := .env
 
@@ -19,6 +20,10 @@ help: ## Mostra esta ajuda
 	@echo "  make ps-airflow      - status dos serviços do Airflow"
 	@echo "  make logs-airflow    - segue logs do webserver e scheduler"
 	@echo "  make down-airflow    - derruba serviços do Airflow (mantém dados)"
+	@echo "  make up-spark        - sobe Spark master + worker"
+	@echo "  make ps-spark        - status dos serviços Spark"
+	@echo "  make logs-spark      - segue logs do Spark master e worker"
+	@echo "  make down-spark      - derruba serviços Spark (mantém dados)"
 	@echo "  make down-all        - derruba tudo (mantém dados)"
 	@echo "  make stop-all        - para tudo (mantém dados)"
 	@echo "  make restart-airflow - reinicia webserver/scheduler/worker"
@@ -53,18 +58,35 @@ logs-airflow: ## Logs do webserver e scheduler
 down-airflow: ## Derruba serviços do Airflow (mantém dados)
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) down
 
+# ====== Spark ======
+up-spark: network env ## Sobe Spark master + worker
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_SPARK) up -d
+
+ps-spark: ## Status dos serviços Spark
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_SPARK) ps
+
+logs-spark: ## Logs do Spark master e worker
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_SPARK) logs -f spark-master spark-worker
+
+down-spark: ## Derruba serviços Spark (mantém dados)
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_SPARK) down
+
+recreate-spark: network env ## Recria spark-master/worker com --force-recreate
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_SPARK) up -d --force-recreate
+# ====== Meta targets ======
+
 down-all: ## Derruba tudo (mantém dados)
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) down || true
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_CORE) down || true
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_SPARK) down || true
 
 stop-all: ## Para tudo (mantém dados)
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) stop || true
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_CORE) stop || true
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_SPARK) stop || true
 
 restart-airflow: ## Reinicia webserver/scheduler/worker
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) restart airflow-webserver airflow-scheduler airflow-worker
-
-# ====== Meta targets ======
 
 all: up-core up-airflow ## Sobe todo o stack (sem init)
 
