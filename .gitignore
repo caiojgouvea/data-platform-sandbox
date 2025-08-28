@@ -43,3 +43,12 @@ Thumbs.db
 
 spark/conf/*.*.template
 spark/conf/*.template
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Outros arquivos temporários
+__pycache__/
+*.py[cod]
+*$py.class

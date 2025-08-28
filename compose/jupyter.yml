@@ -1,0 +1,35 @@
+services:
+  datalab-jupyter-notebook:
+    build:
+      context: ..
+      dockerfile: docker/jupyter-client.Dockerfile
+      args:
+        SPARK_IMAGE: ${SPARK_IMAGE}   # ex: bitnami/spark:3.5.6
+    container_name: datalab-jupyter-notebook
+    networks:
+      - datalab-net
+    ports:
+      - "8888:8888"
+    volumes:
+      - ../notebooks:/opt/notebooks
+      - ${HOME}/.ivy2:/root/.ivy2
+    working_dir: /opt/notebooks
+    # Se você MANTEVE o container como root: adicione --allow-root no final
+    # Se você ALTEROU o Dockerfile para USER 1001, NÃO coloque --allow-root
+    environment:
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN:-datalab-dev-token}
+    command: >
+      bash -lc "/opt/bitnami/python/bin/jupyter lab
+      --ip=0.0.0.0 --port=8888 --no-browser
+      --IdentityProvider.token=${JUPYTER_TOKEN}
+      --ServerApp.token=${JUPYTER_TOKEN}
+      --ServerApp.password=''
+      --ServerApp.allow_remote_access=1
+      --ServerApp.allow_origin='*'
+      --allow-root"
+    depends_on:
+      - spark-master
+
+networks:
+  datalab-net:
+    external: true
