@@ -18,6 +18,9 @@ services:
     # Se você ALTEROU o Dockerfile para USER 1001, NÃO coloque --allow-root
     environment:
       - JUPYTER_TOKEN=${JUPYTER_TOKEN:-datalab-dev-token}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
     command: >
       bash -lc "/opt/bitnami/python/bin/jupyter lab
       --ip=0.0.0.0 --port=8888 --no-browser
