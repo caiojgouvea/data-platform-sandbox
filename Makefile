@@ -12,6 +12,7 @@ NOTEBOOK_SVC ?= datalab-jupyter-notebook
 SERVICE_SPARK ?= spark-master
 # URL do master do cluster Standalone (sobrescreva com MASTER=local[*] p/ rodar local)
 MASTER ?= spark://spark-master:7077
+FILES_DREMIO := -f compose/dremio.yml
 
 # ====== Tarefas ======
 
@@ -70,6 +71,19 @@ logs-airflow: ## Logs do webserver e scheduler
 
 down-airflow: ## Derruba serviços do Airflow (mantém dados)
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) down
+
+# ====== Dremio ======
+up-dremio:
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_DREMIO) up -d
+
+down-dremio:
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_DREMIO) down || true
+
+ps-dremio:
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_DREMIO) ps
+
+logs-dremio:
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_DREMIO) logs -f dremio
 
 # ====== Spark ======
 up-spark: network env ## Sobe Spark master + worker

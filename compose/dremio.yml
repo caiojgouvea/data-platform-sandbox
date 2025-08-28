@@ -1,0 +1,28 @@
+services:
+  dremio:
+    image: dremio/dremio-oss:latest
+    container_name: datalab-dremio
+    networks: [datalab-net]
+    env_file:
+      - ../.env
+    ports:
+      - "9047:9047"
+      - "31010:31010"
+      - "32010:32010"
+      - "45678:45678"
+    environment:
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+      - AWS_REGION=us-east-1
+      - FS_S3A_ENDPOINT=minio:9000
+      - FS_S3A_PATH_STYLE_ACCESS=true
+      - DREMIO_AWS_GLUE_ENABLED=false
+    volumes:
+      - dremio-data:/opt/dremio/data
+
+networks:
+  datalab-net:
+    external: true
+
+volumes:
+  dremio-data:
