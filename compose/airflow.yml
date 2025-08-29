@@ -12,24 +12,26 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       PYTHONPATH: /opt/airflow/src
+      UMASK: 000
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
     user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
     entrypoint: /bin/bash
-    command:
-      - -c
-      - >
-        set -e;
-        for i in $(seq 1 30); do
-          if pg_isready -h postgres -p 5432 -U "${POSTGRES_USER}" >/dev/null 2>&1; then
-            break;
-          fi;
-          sleep 1;
-        done;
-        airflow db migrate;
+    command: >
+      -c "pip install --no-cache-dir -r /requirements.txt &&
+          set -e;
+          for i in $(seq 1 30); do
+            if pg_isready -h postgres -p 5432 -U \"${POSTGRES_USER}\" >/dev/null 2>&1; then
+              break;
+            fi;
+            sleep 1;
+          done;
+          airflow db migrate;"
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
+      - ../requirements.txt:/requirements.txt
     networks: ["datalab-net"]
     mem_limit: 512m
     cpus: "0.5"
@@ -44,17 +46,21 @@ services:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       PYTHONPATH: /opt/airflow/src
+      UMASK: 000
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
     depends_on:
       - postgres
       - redis
     ports: ["8088:8080"]
     user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
-    command: webserver
+    command: >
+      bash -c "pip install --no-cache-dir -r /requirements.txt && airflow webserver"
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
+      - ../requirements.txt:/requirements.txt
     networks: ["datalab-net"]
     mem_limit: 2g
     cpus: "1.0"
@@ -69,15 +75,19 @@ services:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       PYTHONPATH: /opt/airflow/src
+      UMASK: 000
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
     depends_on:
       - airflow-webserver
     user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
-    command: scheduler
+    command: >
+      bash -c "pip install --no-cache-dir -r /requirements.txt && airflow scheduler"
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
+      - ../requirements.txt:/requirements.txt
     networks: ["datalab-net"]
     mem_limit: 2g
     cpus: "1.0"
@@ -92,15 +102,19 @@ services:
       AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       PYTHONPATH: /opt/airflow/src
+      UMASK: 000
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
     depends_on:
       - airflow-webserver
     user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
-    command: celery worker
+    command: >
+      bash -c "pip install --no-cache-dir -r /requirements.txt && airflow celery worker"
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
       - ../airflow/plugins:/opt/airflow/plugins
       - ../src:/opt/airflow/src:rw
+      - ../requirements.txt:/requirements.txt
     networks: ["datalab-net"]
     mem_limit: 4g
     cpus: "2.0"

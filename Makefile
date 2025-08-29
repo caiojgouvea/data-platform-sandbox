@@ -13,6 +13,7 @@ SERVICE_SPARK ?= spark-master
 # URL do master do cluster Standalone (sobrescreva com MASTER=local[*] p/ rodar local)
 MASTER ?= spark://spark-master:7077
 FILES_DREMIO := -f compose/dremio.yml
+FILES_KAFKA := -f compose/kafka.yml
 
 # ====== Tarefas ======
 
@@ -61,7 +62,7 @@ ps-core: ## Mostra status do core
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_CORE) ps
 
 up-airflow: network env ## Sobe Redis + Airflow (exige core ativo)
-	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) up -d
+	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) up -d --remove-orphans
 
 ps-airflow: ## Status do Airflow
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) ps
@@ -71,6 +72,16 @@ logs-airflow: ## Logs do webserver e scheduler
 
 down-airflow: ## Derruba serviços do Airflow (mantém dados)
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) down
+
+# ===== Kafka ======
+up-kafka: network
+	docker compose -p $(PROJECT) $(FILES_KAFKA) up -d
+
+down-kafka:
+	docker compose -p $(PROJECT) $(FILES_KAFKA) down
+
+logs-kafka:
+	docker compose -p $(PROJECT) $(FILES_KAFKA) logs -f
 
 # ====== Dremio ======
 up-dremio:
@@ -142,6 +153,6 @@ stop-all: ## Para tudo (mantém dados)
 restart-airflow: ## Reinicia webserver/scheduler/worker
 	docker compose --env-file $(ENVFILE) -p $(PROJECT) $(FILES_AIRFLOW) restart airflow-webserver airflow-scheduler airflow-worker
 
-all: up-core up-airflow ## Sobe todo o stack (sem init)
+all: up-core up-airflow up-spark up-notebook up-dremio up-kafka ## Sobe todo o stack
 
 start: up-core up-airflow ## Sobe todo o stack (sem init, uso diário)

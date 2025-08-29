@@ -5,6 +5,8 @@ services:
     networks: [datalab-net]
     env_file:
       - ../.env
+    mem_limit: 4g
+    cpus: "2.0"
     ports:
       - "9047:9047"
       - "31010:31010"

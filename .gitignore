@@ -52,3 +52,6 @@ spark/conf/*.template
 __pycache__/
 *.py[cod]
 *$py.class
+
+/home/caio/datalab/spark/jars/
+/home/caio/datalab/spark/jars/*

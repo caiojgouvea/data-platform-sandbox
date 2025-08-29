@@ -38,11 +38,14 @@ services:
       # credenciais para S3A (via chain padrão)
       AWS_ACCESS_KEY_ID: "${MINIO_ROOT_USER}"
       AWS_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
+
+      SPARK_EXTRA_CLASSPATH: /opt/spark/jars/*
     env_file:
       - ../.env
     volumes:
       - ./create-user.sh:/docker-entrypoint-initdb.d/create-user.sh
       - ../spark/conf:/opt/bitnami/spark/conf
+      - ./spark/jars:/opt/spark/jars
     tmpfs:
       - /tmp/ivy2:size=1g,mode=1777
     healthcheck:
@@ -94,11 +97,13 @@ services:
 
       AWS_ACCESS_KEY_ID: "${MINIO_ROOT_USER}"
       AWS_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
+      SPARK_EXTRA_CLASSPATH: /opt/spark/jars/*
     env_file:
       - ../.env
     volumes:
       - ../spark/conf:/opt/bitnami/spark/conf
       - ./create-user.sh:/docker-entrypoint-initdb.d/create-user.sh
+      - ./spark/jars:/opt/spark/jars
     tmpfs:
       - /tmp/ivy2:size=1g,mode=1777
     networks:
