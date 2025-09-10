@@ -1,0 +1,3 @@
+[submodule "airflow/dags/projetos/ibge"]
+	path = airflow/dags/projetos/ibge
+	url = https://github.com/caiojgouvea/airflow-hello-world-test.git
